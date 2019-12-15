@@ -16,27 +16,34 @@ def opcodeComputer(input):
 		parameter1Mode = digits[2]
 		parameter2Mode = digits[1]
 		parameter3Mode = digits[0]
-		#print(data[225])
+		instructionJump = 0
 		#print(cursorPosition, ': ', opcode, ' - Digits: ', digits)
 
 		if opcode == 1:
 			addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
-			#data[data[cursorPosition+3]] = (data[data[cursorPosition+1]] + data[data[cursorPosition+2]])
 			instructionJump = 4
 		elif opcode == 2:
 			multiplyInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
-			#data[data[cursorPosition+3]] = (data[data[cursorPosition+1]] * data[data[cursorPosition+2]])
 			instructionJump = 4
 		elif opcode == 3:
 			saveInstruction(cursorPosition, parameter1Mode, input)
-			#data[data[cursorPosition+1]] = input.pop(0)
 			instructionJump = 2
 		elif opcode == 4:
 			retrieveInstruction(cursorPosition, parameter1Mode)
-			#print(data[data[cursorPosition+1]])
 			instructionJump = 2
+		elif opcode == 5:
+			cursorPosition = jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode)
+		elif opcode == 6:
+			cursorPosition = jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode)
+		elif opcode == 7:
+			lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			instructionJump = 4
+		elif opcode == 8:
+			equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			instructionJump = 4
+
 		
-		if cursorPosition+instructionJump > len(data): # MODIFICAR ISSO PARA O TAMANHO DE AUMENTO DO CURSOR SER VARIAVEL
+		if cursorPosition+instructionJump > len(data):
 			break
 		else:
 			cursorPosition += instructionJump
@@ -107,10 +114,102 @@ def retrieveInstruction(cursorPosition, parameter1Mode):
 	else:
 		print(data[data[cursorPosition+1]])
 
+def jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode):
+	jumps = False
+	#parameter 1
+	if parameter1Mode == 1:
+		if data[cursorPosition+1] != 0:
+			jumps = True
+	else:
+		if data[data[cursorPosition+1]] != 0:
+			jumps = True
+	#parameter 2
+	if jumps == True:
+		if parameter2Mode == 1:
+			cursorPosition = data[cursorPosition+2]
+		else:
+			cursorPosition = data[data[cursorPosition+2]]
+	else:
+		if cursorPosition+3 < len(data):
+			cursorPosition += 3
+
+	return cursorPosition
+
+def jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode):
+	jumps = False
+
+	#parameter 1
+	if parameter1Mode == 1:
+		if data[cursorPosition+1] == 0:
+			jumps = True
+	else:
+		if data[data[cursorPosition+1]] == 0:
+			jumps = True
+	#parameter 2
+	if jumps == True:
+		if parameter2Mode == 1:
+			cursorPosition = data[cursorPosition+2]
+		else:
+			cursorPosition = data[data[cursorPosition+2]]
+	else:
+		if cursorPosition+3 < len(data):
+			cursorPosition += 3
+
+	return cursorPosition
+
+def lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+	# Parameter 1
+	if parameter1Mode == 1:
+		firstParameter = data[cursorPosition+1]
+	else:
+		firstParameter = data[data[cursorPosition+1]]
+
+	# Parameter 2
+	if parameter2Mode == 1:
+		secondParameter = data[cursorPosition+2]
+	else:
+		secondParameter = data[data[cursorPosition+2]]
+
+	# Parameter 3
+	if firstParameter < secondParameter:
+		if parameter3Mode == 1:
+			data[cursorPosition+3] = 1
+		else:
+			data[data[cursorPosition+3]] = 1
+	else:
+		if parameter3Mode == 1:
+			data[cursorPosition+3] = 0
+		else:
+			data[data[cursorPosition+3]] = 0
+
+def equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+	# Parameter 1
+	if parameter1Mode == 1:
+		firstParameter = data[cursorPosition+1]
+	else:
+		firstParameter = data[data[cursorPosition+1]]
+
+	# Parameter 2
+	if parameter2Mode == 1:
+		secondParameter = data[cursorPosition+2]
+	else:
+		secondParameter = data[data[cursorPosition+2]]
+
+	# Parameter 3
+	if firstParameter == secondParameter:
+		if parameter3Mode == 1:
+			data[cursorPosition+3] = 1
+		else:
+			data[data[cursorPosition+3]] = 1
+	else:
+		if parameter3Mode == 1:
+			data[cursorPosition+3] = 0
+		else:
+			data[data[cursorPosition+3]] = 0
 
 
 # main program
-opcodeComputer([1])
+opcodeComputer([5])
 
 #testes:
 # digits = getIndividualDigits(1012)
