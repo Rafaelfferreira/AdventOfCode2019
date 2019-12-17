@@ -49,9 +49,36 @@ def calculateOrbits(object, totalOrbits, height):
 
 	return totalOrbits
 
+def calculatePathsToCOM(youPath, santaPath):
+	currentPosition = galaxyGraph["YOU"]
+	while currentPosition.directOrbit != None:
+		youPath.append(currentPosition.directOrbit)
+		currentPosition = galaxyGraph[currentPosition.directOrbit]
 
-# main 
+	currentPosition = galaxyGraph["SAN"]
+	while currentPosition.directOrbit != None:
+		santaPath.append(currentPosition.directOrbit)
+		currentPosition = galaxyGraph[currentPosition.directOrbit]
+
+def calculateMinimalOrbitTransfers(youPath, santaPath):
+	while len(youPath) != 0 or len(santaPath) != 0:
+		currentYou = youPath.pop()
+		currentSanta = santaPath.pop()
+
+		if currentYou != currentSanta:
+			return (len(youPath) + len(santaPath) + 2) # the +2 is to compensate for the two previous pops
+
+	return float(inf)
+
+# part 1
 totalOrbits = 0
 height = 0
 totalOrbits = calculateOrbits(galaxyGraph['COM'], totalOrbits, height)
 print(totalOrbits)
+
+# part 2
+youPath = []
+santaPath = []
+calculatePathsToCOM(youPath, santaPath)
+print(calculateMinimalOrbitTransfers(youPath, santaPath))
+
