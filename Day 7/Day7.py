@@ -3,8 +3,66 @@ import copy
 import itertools
 
 #reading the input
-data = open('input.txt', 'r').read().split(',')
-data = list(map(int, data))
+# data = open('inputTeste.txt', 'r').read().split(',')
+# data = list(map(int, data))
+
+class amplifier:
+	def __init__(self, phaseSetting, data):
+		self.cursorPosition = 0
+		self.inputArray = [phaseSetting]
+		self.halted = False
+		self.data = data
+		self.output = None
+
+	def opcodeComputerAmp(self, input):
+		self.inputArray.append(input)
+		instructionJump = 4
+
+		while self.data[self.cursorPosition] != 99:
+			# separating each component of the opcode
+			digits = getIndividualDigits(self.data[self.cursorPosition])
+			opcode = int(str(digits[3]) + str(digits[4]))
+			parameter1Mode = digits[2]
+			parameter2Mode = digits[1]
+			parameter3Mode = digits[0]
+			instructionJump = 0
+
+			# print(amp.cursorPosition, ': ', opcode, ' - Digits: ', digits)
+
+			if opcode == 1:
+				addInstruction(self.cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, self.data)
+				instructionJump = 4
+			elif opcode == 2:
+				multiplyInstruction(self.cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, self.data)
+				instructionJump = 4
+			elif opcode == 3:
+				saveInstructionLoop(self.cursorPosition, parameter1Mode, self.inputArray.pop(0), self.data)
+				instructionJump = 2
+			elif opcode == 4:
+				self.output = retrieveInstruction(self.cursorPosition, parameter1Mode, self.data)
+				instructionJump = 2
+			elif opcode == 5:
+				self.cursorPosition = jumpIfTrue(self.cursorPosition, parameter1Mode, parameter2Mode, self.data)
+			elif opcode == 6:
+				self.cursorPosition = jumpIfFalse(self.cursorPosition, parameter1Mode, parameter2Mode, self.data)
+			elif opcode == 7:
+				lessThen(self.cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, self.data)
+				instructionJump = 4
+			elif opcode == 8:
+				equals(self.cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, self.data)
+				instructionJump = 4
+
+			
+			if self.cursorPosition+instructionJump > len(self.data):
+				break
+			else:
+				self.cursorPosition += instructionJump
+
+			if opcode == 4:
+				return self.output
+
+		self.halted = True
+		return self.output
 
 def opcodeComputer(input, output):
 	cursorPosition = 0 #starting position of the cursor
@@ -68,13 +126,12 @@ def getIndividualDigits(number):
 
 	return digits
 
-def addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+def addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, data):
 	#first parameter
 	if parameter1Mode == 1:
 		sum = data[cursorPosition+1]
 	else:
 		sum = data[data[cursorPosition+1]]
-
 	#second parameter
 	if parameter2Mode == 1:
 		sum += data[cursorPosition+2]
@@ -87,7 +144,7 @@ def addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mod
 	else:
 		data[data[cursorPosition+3]] = sum
 
-def multiplyInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+def multiplyInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, data):
 	#first parameter
 	if parameter1Mode == 1:
 		total = data[cursorPosition+1]
@@ -112,19 +169,26 @@ def saveInstruction(cursorPosition, parameter1Mode, input):
 	else:
 		data[data[cursorPosition+1]] = input.pop(0)
 
-def retrieveInstruction(cursorPosition, parameter1Mode):
+def saveInstructionLoop(cursorPosition, parameter1Mode, input, data):
+	if parameter1Mode == 1:
+		data[cursorPosition+1] = input
+	else:
+		data[data[cursorPosition+1]] = input
+
+def retrieveInstruction(cursorPosition, parameter1Mode, data):
 	if parameter1Mode == 1:
 		return data[cursorPosition+1]
 	else:
 		return data[data[cursorPosition+1]]
 
-def jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode):
+def jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode, data):
 	jumps = False
 	#parameter 1
 	if parameter1Mode == 1:
 		if data[cursorPosition+1] != 0:
 			jumps = True
 	else:
+		# print("DATA DO JUMP: ", data[data[cursorPosition+1]])
 		if data[data[cursorPosition+1]] != 0:
 			jumps = True
 	#parameter 2
@@ -137,9 +201,10 @@ def jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode):
 		if cursorPosition+3 < len(data):
 			cursorPosition += 3
 
+	# print("PULOU: ", jumps)
 	return cursorPosition
 
-def jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode):
+def jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode, data):
 	jumps = False
 
 	#parameter 1
@@ -161,7 +226,7 @@ def jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode):
 
 	return cursorPosition
 
-def lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+def lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, data):
 	# Parameter 1
 	if parameter1Mode == 1:
 		firstParameter = data[cursorPosition+1]
@@ -186,7 +251,7 @@ def lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
 		else:
 			data[data[cursorPosition+3]] = 0
 
-def equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
+def equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode, data):
 	# Parameter 1
 	if parameter1Mode == 1:
 		firstParameter = data[cursorPosition+1]
@@ -257,7 +322,45 @@ def calculateMaxThrusterSignal():
 
 	return maxThrusterSignal
 
-# main program
-print(calculateMaxThrusterSignal())
+def calculateThrusterSignalLoop(phaseSettingSequence):
+	inputData = open('input.txt', 'r').read().split(',')
+	inputData = list(map(int, inputData))
+
+	ampA = amplifier(phaseSettingSequence[0], inputData[:])
+	ampB = amplifier(phaseSettingSequence[1], inputData[:])
+	ampC = amplifier(phaseSettingSequence[2], inputData[:])
+	ampD = amplifier(phaseSettingSequence[3], inputData[:])
+	ampE = amplifier(phaseSettingSequence[4], inputData[:])
+	
+
+	outputSignal = 0
+
+	while ampE.halted != True:
+		outputSignal = ampA.opcodeComputerAmp(outputSignal)
+		outputSignal = ampB.opcodeComputerAmp(outputSignal)
+		outputSignal = ampC.opcodeComputerAmp(outputSignal)
+		outputSignal = ampD.opcodeComputerAmp(outputSignal)
+		outputSignal = ampE.opcodeComputerAmp(outputSignal)
+
+	return outputSignal
+
+def calculateMaxThrusterSignalLoop():
+	possiblePhaseSettings = [5,6,7,8,9]
+	maxThrusterSignal = 0
+	phasePermutations = list(itertools.permutations(possiblePhaseSettings))
+	for permutation in phasePermutations:
+		tempSignal = calculateThrusterSignalLoop(permutation)
+		if tempSignal > maxThrusterSignal:
+			maxThrusterSignal = tempSignal
+	
+
+	return maxThrusterSignal
+
+
+# main program part 1
+#print(calculateMaxThrusterSignal())
+
+# main program part 2
+print(calculateMaxThrusterSignalLoop())
 
 
