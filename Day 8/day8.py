@@ -56,8 +56,35 @@ for row in layers[layerWithFewer0s]:
 		elif digit == '2':
 			numberOf2s += 1
 
-print(numberOf1s * numberOf2s)
+print("Part 1 answer: ", numberOf1s * numberOf2s)
+# part 2
+decodedImage = []
+for row in range(0, imageHeight):
+	currentRow = []
+	for line in range(0,imageWidth):
+		currentLayer = 0
+		currentPixel = None
+		
+		while True:
+			currentPixel = layers[currentLayer][row][line]
+			if currentPixel != '2':
+				break
+			else:
+				currentLayer += 1
 
+		currentRow.append(currentPixel)
+	decodedImage.append(currentRow)
+
+for row in decodedImage:
+	line = ''
+	for digit in row:
+		if digit == '1':
+			line += '#'
+		else:
+			line += ' '
+	print(line)
+
+# print("Part 2 answer: ", returnMessage)
 
 
 
