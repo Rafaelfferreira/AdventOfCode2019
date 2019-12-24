@@ -17,29 +17,48 @@ def opcodeComputer(input):
 		parameter2Mode = digits[1]
 		parameter3Mode = digits[0]
 		instructionJump = 0
-		#print(cursorPosition, ': ', opcode, ' - Digits: ', digits)
+		# print(cursorPosition, ': ', opcode, ' - Digits: ', digits)
+
+		# parameter 1
+		if parameter1Mode == 0:
+			valueParameter1 = data[cursorPosition+1]
+		elif parameter1Mode == 1:
+			valueParameter1 = cursorPosition+1
+
+		# parameter 2
+		if parameter2Mode == 0:
+			valueParameter2 = data[cursorPosition+2]
+		elif parameter2Mode == 1:
+			valueParameter2 = cursorPosition+2
+
+		# parameter 3
+		if parameter3Mode == 0:
+			valueParameter3 = data[cursorPosition+3]
+		elif parameter3Mode == 1:
+			valueParameter3 = cursorPosition+3
+
 
 		if opcode == 1:
-			addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			addInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 2:
-			multiplyInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			multiplyInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 3:
-			saveInstruction(cursorPosition, parameter1Mode, input)
+			saveInstruction(cursorPosition, valueParameter1, input)
 			instructionJump = 2
 		elif opcode == 4:
-			retrieveInstruction(cursorPosition, parameter1Mode)
+			retrieveInstruction(cursorPosition, valueParameter1)
 			instructionJump = 2
 		elif opcode == 5:
-			cursorPosition = jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode)
+			cursorPosition = jumpIfTrue(cursorPosition, valueParameter1, valueParameter2)
 		elif opcode == 6:
-			cursorPosition = jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode)
+			cursorPosition = jumpIfFalse(cursorPosition, valueParameter1, valueParameter2)
 		elif opcode == 7:
-			lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			lessThen(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 8:
-			equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode)
+			equals(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 
 		
@@ -64,151 +83,55 @@ def getIndividualDigits(number):
 
 	return digits
 
-def addInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
-	#first parameter
-	if parameter1Mode == 1:
-		sum = data[cursorPosition+1]
-	else:
-		sum = data[data[cursorPosition+1]]
+def addInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+	sum = data[valueParameter1] + data[valueParameter2]
+	data[valueParameter3] = sum
 
-	#second parameter
-	if parameter2Mode == 1:
-		sum += data[cursorPosition+2]
-	else:
-		sum += data[data[cursorPosition+2]]
+def multiplyInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+	total = data[valueParameter1] * data[valueParameter2]
+	data[valueParameter3] = total
 
-	#third parameter
-	if parameter3Mode == 1:
-		data[cursorPosition+3] = sum
-	else:
-		data[data[cursorPosition+3]] = sum
+def saveInstruction(cursorPosition, valueParameter1, input):
+	data[valueParameter1] = input.pop(0)
 
-def multiplyInstruction(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
-	#first parameter
-	if parameter1Mode == 1:
-		total = data[cursorPosition+1]
-	else:
-		total = data[data[cursorPosition+1]]
+def retrieveInstruction(cursorPosition, valueParameter1):
+	print(data[valueParameter1])
 
-	#second parameter
-	if parameter2Mode == 1:
-		total = total * data[cursorPosition+2]
-	else:
-		total = total * data[data[cursorPosition+2]]
-
-	#third parameter
-	if parameter3Mode == 1:
-		data[cursorPosition+3] = total
-	else:
-		data[data[cursorPosition+3]] = total
-
-def saveInstruction(cursorPosition, parameter1Mode, input):
-	if parameter1Mode == 1:
-		data[cursorPosition+1] = input.pop(0)
-	else:
-		data[data[cursorPosition+1]] = input.pop(0)
-
-def retrieveInstruction(cursorPosition, parameter1Mode):
-	if parameter1Mode == 1:
-		print(data[cursorPosition+1])
-	else:
-		print(data[data[cursorPosition+1]])
-
-def jumpIfTrue(cursorPosition, parameter1Mode, parameter2Mode):
-	jumps = False
-	#parameter 1
-	if parameter1Mode == 1:
-		if data[cursorPosition+1] != 0:
-			jumps = True
-	else:
-		if data[data[cursorPosition+1]] != 0:
-			jumps = True
-	#parameter 2
-	if jumps == True:
-		if parameter2Mode == 1:
-			cursorPosition = data[cursorPosition+2]
-		else:
-			cursorPosition = data[data[cursorPosition+2]]
+def jumpIfTrue(cursorPosition, valueParameter1, valueParameter2):
+	if data[valueParameter1] != 0:
+		cursorPosition = data[valueParameter2]
 	else:
 		if cursorPosition+3 < len(data):
 			cursorPosition += 3
 
 	return cursorPosition
 
-def jumpIfFalse(cursorPosition, parameter1Mode, parameter2Mode):
-	jumps = False
-
-	#parameter 1
-	if parameter1Mode == 1:
-		if data[cursorPosition+1] == 0:
-			jumps = True
-	else:
-		if data[data[cursorPosition+1]] == 0:
-			jumps = True
-	#parameter 2
-	if jumps == True:
-		if parameter2Mode == 1:
-			cursorPosition = data[cursorPosition+2]
-		else:
-			cursorPosition = data[data[cursorPosition+2]]
+def jumpIfFalse(cursorPosition, valueParameter1, valueParameter2):
+	if data[valueParameter1] == 0:
+		cursorPosition = data[valueParameter2]
 	else:
 		if cursorPosition+3 < len(data):
 			cursorPosition += 3
 
 	return cursorPosition
 
-def lessThen(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
-	# Parameter 1
-	if parameter1Mode == 1:
-		firstParameter = data[cursorPosition+1]
+def lessThen(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+	if data[valueParameter1] < data[valueParameter2]:
+		data[valueParameter3] = 1
 	else:
-		firstParameter = data[data[cursorPosition+1]]
+		data[valueParameter3] = 0
 
-	# Parameter 2
-	if parameter2Mode == 1:
-		secondParameter = data[cursorPosition+2]
+def equals(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+	if data[valueParameter1] == data[valueParameter2]:
+		data[valueParameter3] = 1
 	else:
-		secondParameter = data[data[cursorPosition+2]]
-
-	# Parameter 3
-	if firstParameter < secondParameter:
-		if parameter3Mode == 1:
-			data[cursorPosition+3] = 1
-		else:
-			data[data[cursorPosition+3]] = 1
-	else:
-		if parameter3Mode == 1:
-			data[cursorPosition+3] = 0
-		else:
-			data[data[cursorPosition+3]] = 0
-
-def equals(cursorPosition, parameter1Mode, parameter2Mode, parameter3Mode):
-	# Parameter 1
-	if parameter1Mode == 1:
-		firstParameter = data[cursorPosition+1]
-	else:
-		firstParameter = data[data[cursorPosition+1]]
-
-	# Parameter 2
-	if parameter2Mode == 1:
-		secondParameter = data[cursorPosition+2]
-	else:
-		secondParameter = data[data[cursorPosition+2]]
-
-	# Parameter 3
-	if firstParameter == secondParameter:
-		if parameter3Mode == 1:
-			data[cursorPosition+3] = 1
-		else:
-			data[data[cursorPosition+3]] = 1
-	else:
-		if parameter3Mode == 1:
-			data[cursorPosition+3] = 0
-		else:
-			data[data[cursorPosition+3]] = 0
+		data[valueParameter3] = 0
 
 
 # main program
+# print(data[3])
+# print(data[4])
+# print(data[5])
 opcodeComputer([5])
 
 #testes:
