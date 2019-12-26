@@ -39,26 +39,26 @@ def opcodeComputer(input):
 
 
 		if opcode == 1:
-			addInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
+			addInstruction(valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 2:
-			multiplyInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
+			multiplyInstruction(valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 3:
-			saveInstruction(cursorPosition, valueParameter1, input)
+			saveInstruction(valueParameter1, input)
 			instructionJump = 2
 		elif opcode == 4:
-			retrieveInstruction(cursorPosition, valueParameter1)
+			retrieveInstruction(valueParameter1)
 			instructionJump = 2
 		elif opcode == 5:
 			cursorPosition = jumpIfTrue(cursorPosition, valueParameter1, valueParameter2)
 		elif opcode == 6:
 			cursorPosition = jumpIfFalse(cursorPosition, valueParameter1, valueParameter2)
 		elif opcode == 7:
-			lessThen(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
+			lessThen(valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 		elif opcode == 8:
-			equals(cursorPosition, valueParameter1, valueParameter2, valueParameter3)
+			equals(valueParameter1, valueParameter2, valueParameter3)
 			instructionJump = 4
 
 		
@@ -83,18 +83,18 @@ def getIndividualDigits(number):
 
 	return digits
 
-def addInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+def addInstruction(valueParameter1, valueParameter2, valueParameter3):
 	sum = data[valueParameter1] + data[valueParameter2]
 	data[valueParameter3] = sum
 
-def multiplyInstruction(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+def multiplyInstruction(valueParameter1, valueParameter2, valueParameter3):
 	total = data[valueParameter1] * data[valueParameter2]
 	data[valueParameter3] = total
 
-def saveInstruction(cursorPosition, valueParameter1, input):
+def saveInstruction(valueParameter1, input):
 	data[valueParameter1] = input.pop(0)
 
-def retrieveInstruction(cursorPosition, valueParameter1):
+def retrieveInstruction(valueParameter1):
 	print(data[valueParameter1])
 
 def jumpIfTrue(cursorPosition, valueParameter1, valueParameter2):
@@ -115,13 +115,13 @@ def jumpIfFalse(cursorPosition, valueParameter1, valueParameter2):
 
 	return cursorPosition
 
-def lessThen(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+def lessThen(valueParameter1, valueParameter2, valueParameter3):
 	if data[valueParameter1] < data[valueParameter2]:
 		data[valueParameter3] = 1
 	else:
 		data[valueParameter3] = 0
 
-def equals(cursorPosition, valueParameter1, valueParameter2, valueParameter3):
+def equals(valueParameter1, valueParameter2, valueParameter3):
 	if data[valueParameter1] == data[valueParameter2]:
 		data[valueParameter3] = 1
 	else:
