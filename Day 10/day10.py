@@ -3,7 +3,7 @@ import copy
 import math
 
 # reading the input
-data = open('inputTeste.txt', 'r').read().split('\n')
+data = open('input.txt', 'r').read().split('\n')
 
 asteroids = set()
 
@@ -66,97 +66,100 @@ def part1():
 
 
 # PART 2
-# basePosition = (11,13)
-basePosition = (8,3) # para o input teste. x = 3 e y = 8
+def part2():
+	# basePosition = (11,13)
+	basePosition = (11,13) # para o input teste. x = 3 e y = 8
 
-# creating the list of asteroids in each quarter and adding them to the laser map in the order they will be searched.
-q2 = []
-q4 = []
-q3 = []
-q1 = []
-laserMap = [q2, q4, q3, q1]
+	# creating the list of asteroids in each quarter and adding them to the laser map in the order they will be searched.
+	q2 = []
+	q4 = []
+	q3 = []
+	q1 = []
+	laserMap = [q2, q4, q3, q1]
 
-for currentAsteroid in asteroids:
-	currentQuarter = None
-	currentRatio = None
-	currentDistance = None
+	# maps the asteroids to each quarter
+	for currentAsteroid in asteroids:
+		currentQuarter = None
+		currentRatio = None
+		currentDistance = None
 
-	# mapping in what quarter is the current asteroid
-	# obs: If the asteroid is in one of the dividing lines it is mapped as if it was -1 in the coordinate that coincides with the line 
-	if currentAsteroid[0] <= basePosition[0]: # Q1 or Q3
-		if currentAsteroid[1] > basePosition[1]: 
-			currentQuarter = 'q3'
+		# mapping in what quarter is the current asteroid
+		# obs: If the asteroid is in one of the dividing lines it is mapped as if it was -1 in the coordinate that coincides with the line 
+		if currentAsteroid[0] < basePosition[0]: # Q1 or Q3
+			if currentAsteroid[1] > basePosition[1]: 
+				currentQuarter = 'q3'
+			else:
+				currentQuarter = 'q1'
 		else:
-			currentQuarter = 'q1'
-	else:
-		if currentAsteroid[1] > basePosition[1]: # Q2 or Q4
-			currentQuarter = 'q4'
+			if currentAsteroid[1] > basePosition[1]: # Q2 or Q4
+				currentQuarter = 'q4'
+			else:
+				currentQuarter = 'q2'
+
+		# calculating the ratio
+		if currentAsteroid[1] - basePosition[1] == 0: # if the asteroid is in the y axis of the base
+			if currentAsteroid[0] - basePosition[0] > 0:
+				currentRatio = float('-inf') # "right"
+			else:
+				currentRatio = float('inf') # "left"
+		elif currentAsteroid[0] - basePosition[0] == 0: # if the asteroid is in the x axis of the base
+			if currentAsteroid[1] - basePosition[1] > 0:
+				currentRatio = float('-inf') # "below"
+			else:
+				currentRatio = float('inf') # "above"
 		else:
-			currentQuarter = 'q2'
+			currentRatio = (currentAsteroid[0] - basePosition[0])/(currentAsteroid[1] - basePosition[1])
+			currentRatio = round(currentRatio, 3)
 
-	# calculating the ratio
-	if currentAsteroid[1] - basePosition[1] == 0: # if the asteroid is in the y axis of the base
-		if currentAsteroid[0] - basePosition[0] > 0:
-			currentRatio = "right"
-		else:
-			currentRatio = "left"
-	else:
-		currentRatio = (currentAsteroid[0] - basePosition[0])/(currentAsteroid[1] - basePosition[1])
-		currentRatio = round(currentRatio, 3)
+		# calculating the euclidean distance
+		currentDistance = math.sqrt(pow(currentAsteroid[0] - basePosition[0], 2) + pow(currentAsteroid[1] - basePosition[1], 2))
+		currentDistance = round(currentDistance, 3)
 
-	# calculating the euclidean distance
-	currentDistance = math.sqrt(pow(currentAsteroid[0] - basePosition[0], 2) + pow(currentAsteroid[1] - basePosition[1], 2))
-	currentDistance = round(currentDistance, 3)
+		# print("Teste: ", (currentRatio, currentDistance, currentAsteroid))
 
-	# print("Teste: ", (currentRatio, currentDistance, currentAsteroid))
+		# saving the necessary information in the correct quarter list
+		if currentQuarter == 'q1':
+			q1.append((currentRatio, currentDistance, currentAsteroid))
+		elif currentQuarter == 'q2':
+			q2.append((currentRatio, currentDistance, currentAsteroid))
+		elif currentQuarter == 'q3':
+			q3.append((currentRatio, currentDistance, currentAsteroid))
+		elif currentQuarter == 'q4':
+			q4.append((currentRatio, currentDistance, currentAsteroid))
 
-	# saving the necessary information in the correct quarter list
-	if currentQuarter == 'q1':
-		q1.append((currentRatio, currentDistance, currentAsteroid))
-	elif currentQuarter == 'q2':
-		q2.append((currentRatio, currentDistance, currentAsteroid))
-	elif currentQuarter == 'q3':
-		q3.append((currentRatio, currentDistance, currentAsteroid))
-	elif currentQuarter == 'q4':
-		q4.append((currentRatio, currentDistance, currentAsteroid))
+	# sorting the laser map by ratios and euclidean distance
+	laserMap[0] = sorted(laserMap[0], key=lambda x: (x[0],-x[1]), reverse=True)
+	laserMap[1] = sorted(laserMap[1], key=lambda x: (x[0],-x[1]), reverse=True)
+	laserMap[2] = sorted(laserMap[2], key=lambda x: (x[0],-x[1]), reverse=True)
+	laserMap[3] = sorted(laserMap[3], key=lambda x: (x[0],-x[1]), reverse=True)
 
+	finalLaserMap = laserMap[0] + laserMap[1] + laserMap[2] + laserMap[3]
+	
+	# eliminating each asteroid and keeping track of the order
+	currentAsteroidIndex = 1
+	asteroid200 = None
 
+	while len(finalLaserMap) > 0:
+		asteroidsToRemove = []
+		lastRatio = None
 
+		for asteroid in finalLaserMap:
+			if asteroid[0] != lastRatio:
+				# print(currentAsteroidIndex, " - ", asteroid)
+				asteroidsToRemove.append(asteroid)
+				
+				if currentAsteroidIndex == 200:
+					asteroid200 = asteroid
+				
+				currentAsteroidIndex += 1
+			lastRatio = asteroid[0]
+
+		for item in asteroidsToRemove:
+			finalLaserMap.remove(item)
+
+	print("200th Asteroid: ", asteroid200[2])
+	print("Part 2 asnwer: ", (asteroid200[2][0] * 100) + asteroid200[2][1])
 # main program
 # part1()
-
-
-# test prints
-# data[3][8] = 'R'
-# for line in data:
-# 	print(line)
-# print(data[3][8])
-# print(asteroids)
-
-#um exemplo de sort using lambda funciont
-# print(laserMap)
-print("Q2: ")
-print(laserMap[0])
-print("Quantidade: ", len(laserMap[0]))
-
-print("\nQ4: ")
-print(laserMap[1])
-print("Quantidade: ", len(laserMap[1]))
-
-print("\nQ3: ")
-print(laserMap[2])
-print("Quantidade: ", len(laserMap[2]))
-
-print("\nQ1: ")
-print(laserMap[3])
-print("Quantidade: ", len(laserMap[3]))
-
-for i in range(0, len(laserMap)):
-# 	for asteroid in laserMap[i]:
-# 		if asteroid[0] == None:
-# 			print("ACHOU")
-	print(len(laserMap[i]))
-# print(pow(3,2))
-# print(sorted([('abc', 121),('abc', 231),('abc', 148), ('abc',221)], key=lambda x: x[1]))
-
+part2()
 
